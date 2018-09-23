@@ -1,20 +1,23 @@
 package harrypotterkata.hogwarts.wizard.duelling;
 
 import harrypotterkata.hogwarts.wizard.Wizard;
-import harrypotterkata.hogwarts.wizard.spells.Spell;
 
 import static java.lang.String.format;
 
-public class DuellingClub {
+class DuellingClub {
 
-    public Wizard duel(Wizard a, Wizard b) {
+    private Wizard attackingWizard;
+    private Wizard defendingWizard;
+    private Wizard winner;
+
+    Wizard duel(Wizard a, Wizard b) {
         introduceBothWizards(a, b);
-        Wizard winner = fight(a, b);
-        congratsWinner(winner);
-        return a;
+        winner = fight();
+        congratsWinner();
+        return winner;
     }
 
-    private void congratsWinner(Wizard winner) {
+    private void congratsWinner() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("\n");
@@ -26,43 +29,53 @@ public class DuellingClub {
         System.out.println(sb);
     }
 
-    private Wizard fight(Wizard a, Wizard b) {
-        int hpWizardA = a.getHp();
-        int hpWizardB = b.getHp();
-        Spell spellWizardB;
-        Spell spellWizardA;
+    private Wizard fight() {
+        do {
+            attackingWizard.fireSpellAt(defendingWizard);
+            checkThatAttackerWonDuel();
+            defenderBecomesAttacker();
+        } while (bothWizardsAreStillStanding());
 
-        while(hpWizardA > 0 && hpWizardB > 0){
-            spellWizardA = Spell.getRandomSpell();
-            hpWizardB -= spellWizardA.getDamage();
-            System.out.println(format("%s is summoning the spell %s", a.getName(), spellWizardA));
-            System.out.println(format("%s has %d hp left", b.getName(), hpWizardB));
-            if (hpWizardB <= 0) {
-                return a;
-            }
-            spellWizardB = Spell.getRandomSpell();
-            hpWizardA -= spellWizardB.getDamage();
-            System.out.println(format("%s is summoning the spell %s", b.getName(), spellWizardB));
-            System.out.println(format("%s has %d hp left", a.getName(), hpWizardA));
-            if (hpWizardA <=0){
-                return b;
-            }
+        return winner;
+    }
+
+    private void checkThatAttackerWonDuel() {
+        if (defendingWizardIsDefeated()) {
+            winner = attackingWizard;
         }
-        return null;
+    }
+
+    private boolean defendingWizardIsDefeated() {
+        return defendingWizard.getHp() == 0;
+    }
+
+    private void defenderBecomesAttacker() {
+        Wizard previousAttacker = attackingWizard;
+        Wizard previousDefender = defendingWizard;
+        if (winner == null) {
+            attackingWizard = previousDefender;
+            defendingWizard = previousAttacker;
+        }
+    }
+
+    private boolean bothWizardsAreStillStanding() {
+        return attackingWizard.getHp() > 0 && defendingWizard.getHp() > 0;
     }
 
     private void introduceBothWizards(Wizard a, Wizard b) {
+        this.attackingWizard = a;
+        this.defendingWizard = b;
         StringBuilder sb = new StringBuilder();
 
-        sb.append("Welcome wizards of Hogwarts, at the duelling club!");
+        sb.append("Welcome, wizards of Hogwarts, at the duelling club!");
         sb.append("\n");
         sb.append("\n");
-        sb.append(format("I want to introduce to you at our left side %s from house %s", a.getName(), a.getHouse().name().toLowerCase()));
+        sb.append(format("I want to introduce to you at our left side %s from house %s", attackingWizard.getName(), attackingWizard.getHouse().name().toLowerCase()));
         sb.append("\n");
-        sb.append(format("The opponent at our right side is %s from house %s", b.getName(), b.getHouse().name().toLowerCase()));
+        sb.append(format("The opponent at our right side is %s from house %s", defendingWizard.getName(), defendingWizard.getHouse().name().toLowerCase()));
         sb.append("\n");
         sb.append("\n");
-        sb.append("I wish both sides good luck and may the best wizard win");
+        sb.append("I wish both sides good luck and may the best wizard win!");
 
         System.out.println(sb);
     }
